@@ -12,8 +12,8 @@ from ..core.config import Config
 from .pages.login_page import LoginPage
 from .pages.lessons_page import LessonsPage
 from .pages.solver_page import SolverPage
-from .pages.visualizer_page import VisualizerPage
 from .pages.practice_page import PracticePage
+from .pages.profile_page import ProfilePage
 from .pages.settings_page import SettingsPage
 from .pages.instructor_page import InstructorPage
 from .styles import StyleSheet
@@ -63,8 +63,8 @@ class MainWindow(QMainWindow):
         self.login_page = LoginPage()
         self.lessons_page = LessonsPage()
         self.solver_page = SolverPage()
-        self.visualizer_page = VisualizerPage()
         self.practice_page = PracticePage()
+        self.profile_page = ProfilePage()
         self.settings_page = SettingsPage()
         self.instructor_page = InstructorPage()
         
@@ -82,8 +82,8 @@ class MainWindow(QMainWindow):
         self.content_stack.addWidget(self.login_page)
         self.content_stack.addWidget(self.lessons_page)
         self.content_stack.addWidget(self.solver_page)
-        self.content_stack.addWidget(self.visualizer_page)
         self.content_stack.addWidget(self.practice_page)
+        self.content_stack.addWidget(self.profile_page)
         self.content_stack.addWidget(self.settings_page)
         self.content_stack.addWidget(self.instructor_page)
         
@@ -131,8 +131,8 @@ class MainWindow(QMainWindow):
         nav_items = [
             ("lessons", "📘 Lessons", self.lessons_page),
             ("solver", "🧮 Solver", self.solver_page),
-            ("visualizer", "📊 Visualizer", self.visualizer_page),
             ("practice", "🧠 Practice", self.practice_page),
+            ("profile", "👤 Profile", self.profile_page),
             ("settings", "⚙️ Settings", self.settings_page),
         ]
         
@@ -147,12 +147,13 @@ class MainWindow(QMainWindow):
         
         layout.addSpacing(10)
         
-        # Instructor mode button (highlighted)
+        # Instructor mode button (highlighted) - only show if instructor
         self.instructor_btn = QPushButton("👨‍🏫 Instructor")
         self.instructor_btn.setObjectName("instructorButton")
         self.instructor_btn.setCursor(Qt.PointingHandCursor)
-        self.instructor_btn.setMinimumHeight(40)  # Smaller
+        self.instructor_btn.setMinimumHeight(40)
         self.instructor_btn.clicked.connect(self.show_instructor_page)
+        self.instructor_btn.setVisible(False)  # Hidden by default
         layout.addWidget(self.instructor_btn)
         
         layout.addStretch()
@@ -217,6 +218,15 @@ class MainWindow(QMainWindow):
         
         self.user_label.setText(f"👤 {username}\n({user_id})")
         self.sidebar.setVisible(True)
+        
+        # Check if instructor and show instructor button
+        from .pages.login_page import DataManager
+        user_data = DataManager.get_user(user_id)
+        if user_data and user_data.get('is_instructor'):
+            self.instructor_btn.setVisible(True)
+        else:
+            self.instructor_btn.setVisible(False)
+        
         self.show_page(self.lessons_page)
     
     def on_theme_changed(self, theme: str):

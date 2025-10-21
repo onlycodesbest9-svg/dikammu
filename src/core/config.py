@@ -15,10 +15,7 @@ class Config:
     _data_dir = None
     _config_file = None
     _default_config = {
-        "theme": "light",
-        "font_size": 12,
-        "accent_color": "#007AFF",
-        "graph_color_palette": "viridis",
+        "theme": "dark",  # Default to dark mode
         "instructor_pin": "1234",
         "current_user": None,
         "user_mode": "student",  # "student" or "instructor"

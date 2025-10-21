@@ -118,32 +118,6 @@ class SolverPage(QWidget):
         
         scroll_layout.addWidget(input_card)
         
-        # Examples card
-        examples_card = QFrame()
-        examples_card.setObjectName("card")
-        examples_layout = QVBoxLayout(examples_card)
-        
-        examples_title = QLabel("Example Problems")
-        examples_title.setObjectName("sectionLabel")
-        examples_layout.addWidget(examples_title)
-        
-        examples = [
-            ("Fibonacci", "a(n) = a(n-1) + a(n-2)", {0: 0, 1: 1}),
-            ("Geometric", "a(n) = 2*a(n-1)", {0: 3}),
-            ("Linear", "a(n) = a(n-1) + 5", {0: 5}),
-            ("Second Order", "a(n) = 3*a(n-1) - 2*a(n-2)", {0: 1, 1: 4}),
-        ]
-        
-        example_buttons = QHBoxLayout()
-        for name, rec, ics in examples:
-            btn = QPushButton(name)
-            btn.setObjectName("secondaryButton")
-            btn.clicked.connect(lambda checked, r=rec, i=ics: self.load_example(r, i))
-            example_buttons.addWidget(btn)
-        
-        examples_layout.addLayout(example_buttons)
-        scroll_layout.addWidget(examples_card)
-        
         # Solution card
         self.solution_card = QFrame()
         self.solution_card.setObjectName("card")
@@ -310,16 +284,6 @@ class SolverPage(QWidget):
         
         self.solution_text.setHtml(html)
     
-    def visualize_solution(self):
-        """Visualize the solution"""
-        if hasattr(self, 'last_result') and self.last_result:
-            visualizer_page = self.window().visualizer_page
-            visualizer_page.load_sequence(
-                self.last_recurrence,
-                self.last_ics,
-                self.last_result
-            )
-            self.window().show_page(visualizer_page)
     
     def clear_inputs(self):
         """Clear all inputs"""

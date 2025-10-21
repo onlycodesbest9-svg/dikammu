@@ -52,41 +52,42 @@ class LessonsPage(QWidget):
         
         layout.addSpacing(10)
         
-        # Splitter for lesson list and content
-        splitter = QSplitter(Qt.Horizontal)
+        # Full width layout - no splitter
+        content_layout = QVBoxLayout()
         
-        # Lesson list - BIGGER
+        # Lesson list - FULL WIDTH
         list_container = QFrame()
         list_container.setObjectName("card")
-        list_container.setMinimumWidth(400)
         list_layout = QVBoxLayout(list_container)
         
         list_title = QLabel("📚 Available Lessons")
         list_title.setObjectName("sectionLabel")
-        list_title_font = QFont("Segoe UI", 18, QFont.Bold)
+        list_title_font = QFont("Segoe UI", 20, QFont.Bold)
         list_title.setFont(list_title_font)
         list_layout.addWidget(list_title)
         
         self.lesson_list = QListWidget()
         self.lesson_list.itemClicked.connect(self.on_lesson_selected)
+        self.lesson_list.setMinimumHeight(300)
         list_layout.addWidget(self.lesson_list)
         
-        splitter.addWidget(list_container)
+        content_layout.addWidget(list_container)
         
-        # Content area
+        # Content area - FULL WIDTH
         content_container = QFrame()
         content_container.setObjectName("card")
-        content_layout = QVBoxLayout(content_container)
+        content_container_layout = QVBoxLayout(content_container)
         
         # Lesson title
         self.lesson_title = QLabel("Select a lesson to begin")
         self.lesson_title.setObjectName("sectionLabel")
-        content_layout.addWidget(self.lesson_title)
+        content_container_layout.addWidget(self.lesson_title)
         
         # Content browser
         self.content_browser = QTextBrowser()
         self.content_browser.setOpenExternalLinks(False)
-        content_layout.addWidget(self.content_browser)
+        self.content_browser.setMinimumHeight(400)
+        content_container_layout.addWidget(self.content_browser)
         
         # Buttons
         button_layout = QHBoxLayout()
@@ -109,12 +110,11 @@ class LessonsPage(QWidget):
         self.next_btn.setEnabled(False)
         button_layout.addWidget(self.next_btn)
         
-        content_layout.addLayout(button_layout)
+        content_container_layout.addLayout(button_layout)
         
-        splitter.addWidget(content_container)
-        splitter.setStretchFactor(1, 1)
+        content_layout.addWidget(content_container)
         
-        layout.addWidget(splitter)
+        layout.addLayout(content_layout)
         
         # Load lessons
         self.load_lessons()

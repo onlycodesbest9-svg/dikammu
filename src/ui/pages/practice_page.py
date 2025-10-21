@@ -127,6 +127,11 @@ class PracticePage(QWidget):
         self.hint_btn.clicked.connect(self.show_hint)
         button_layout.addWidget(self.hint_btn)
         
+        self.reset_btn = QPushButton("🔄 Reset Quiz")
+        self.reset_btn.setObjectName("secondaryButton")
+        self.reset_btn.clicked.connect(self.reset_quiz)
+        button_layout.addWidget(self.reset_btn)
+        
         button_layout.addStretch()
         
         self.submit_btn = QPushButton("Submit Answer")
@@ -334,3 +339,21 @@ class PracticePage(QWidget):
     def update_score(self):
         """Update score display"""
         self.score_label.setText(f"Score: {self.score}/{self.total_questions}")
+    
+    def reset_quiz(self):
+        """Reset the entire quiz"""
+        reply = QMessageBox.question(
+            self, "Reset Quiz",
+            "⚠️ This will reset the quiz and lose your current progress.\n\nContinue?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            if self.current_lesson:
+                # Restart the quiz
+                self.current_exercise_index = 0
+                self.score = 0
+                self.update_score()
+                self.progress_bar.setValue(0)
+                self.show_question()
+                QMessageBox.information(self, "Quiz Reset", "✅ Quiz has been reset!")
