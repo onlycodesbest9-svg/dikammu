@@ -55,14 +55,16 @@ class LessonsPage(QWidget):
         # Splitter for lesson list and content
         splitter = QSplitter(Qt.Horizontal)
         
-        # Lesson list
+        # Lesson list - BIGGER
         list_container = QFrame()
         list_container.setObjectName("card")
-        list_container.setMaximumWidth(350)
+        list_container.setMinimumWidth(400)
         list_layout = QVBoxLayout(list_container)
         
-        list_title = QLabel("Available Lessons")
+        list_title = QLabel("📚 Available Lessons")
         list_title.setObjectName("sectionLabel")
+        list_title_font = QFont("Segoe UI", 18, QFont.Bold)
+        list_title.setFont(list_title_font)
         list_layout.addWidget(list_title)
         
         self.lesson_list = QListWidget()

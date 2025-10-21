@@ -95,16 +95,16 @@ class MainWindow(QMainWindow):
         """Create the navigation sidebar"""
         sidebar = QFrame()
         sidebar.setObjectName("sidebar")
-        sidebar.setFixedWidth(280)
+        sidebar.setFixedWidth(220)  # Made smaller
         
         layout = QVBoxLayout(sidebar)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
         
-        # Logo/Title
+        # Logo/Title - Smaller
         title = QLabel("RecursiveLearn")
         title.setObjectName("appTitle")
-        title_font = QFont("Segoe UI", 24, QFont.Bold)
+        title_font = QFont("Segoe UI", 18, QFont.Bold)
         title.setFont(title_font)
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
         subtitle.setAlignment(Qt.AlignCenter)
         layout.addWidget(subtitle)
         
-        layout.addSpacing(20)
+        layout.addSpacing(10)
         
         # User info
         self.user_label = QLabel("Not logged in")
@@ -140,18 +140,18 @@ class MainWindow(QMainWindow):
             btn = QPushButton(text)
             btn.setObjectName("navButton")
             btn.setCursor(Qt.PointingHandCursor)
-            btn.setMinimumHeight(50)
+            btn.setMinimumHeight(40)  # Smaller
             btn.clicked.connect(lambda checked, p=page: self.show_page(p))
             self.nav_buttons[key] = btn
             layout.addWidget(btn)
         
-        layout.addSpacing(20)
+        layout.addSpacing(10)
         
         # Instructor mode button (highlighted)
-        self.instructor_btn = QPushButton("👨‍🏫 Instructor Mode")
+        self.instructor_btn = QPushButton("👨‍🏫 Instructor")
         self.instructor_btn.setObjectName("instructorButton")
         self.instructor_btn.setCursor(Qt.PointingHandCursor)
-        self.instructor_btn.setMinimumHeight(50)
+        self.instructor_btn.setMinimumHeight(40)  # Smaller
         self.instructor_btn.clicked.connect(self.show_instructor_page)
         layout.addWidget(self.instructor_btn)
         
