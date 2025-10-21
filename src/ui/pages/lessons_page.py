@@ -153,33 +153,86 @@ class LessonsPage(QWidget):
         if user_id:
             DataManager.update_progress(user_id, lesson['id'])
     
+    def refresh_content(self):
+        """Refresh lesson content (e.g., after theme change)"""
+        if self.current_lesson:
+            self.content_browser.setHtml(self._format_content(self.current_lesson['content']))
+    
     def _format_content(self, content: str) -> str:
         """Format lesson content as HTML"""
-        css = """
-        <style>
-            body { font-family: 'Segoe UI', sans-serif; line-height: 1.6; }
-            h2 { color: #007AFF; margin-top: 20px; }
-            h3 { color: #0051D5; margin-top: 15px; }
-            h4 { color: #333; margin-top: 10px; }
-            .example { 
-                background-color: #f0f8ff; 
-                padding: 15px; 
-                border-left: 4px solid #007AFF;
-                margin: 15px 0;
-                border-radius: 5px;
-            }
-            ul { margin-left: 20px; }
-            li { margin: 5px 0; }
-            b { color: #0051D5; }
-            i { color: #666; }
-            code { 
-                background-color: #f5f5f5; 
-                padding: 2px 6px; 
-                border-radius: 3px;
-                font-family: 'Courier New', monospace;
-            }
-        </style>
-        """
+        from ...core.config import Config
+        theme = Config.get("theme", "light")
+        
+        if theme == "dark":
+            css = """
+            <style>
+                body { 
+                    font-family: 'Segoe UI', sans-serif; 
+                    line-height: 1.6;
+                    color: #f5f5f7;
+                    background-color: #2c2c2e;
+                }
+                h2 { color: #0A84FF; margin-top: 20px; font-weight: bold; }
+                h3 { color: #0A84FF; margin-top: 15px; font-weight: 600; }
+                h4 { color: #98989d; margin-top: 10px; font-weight: 600; }
+                p { color: #f5f5f7; }
+                .example { 
+                    background-color: #1d1d1f; 
+                    padding: 15px; 
+                    border-left: 4px solid #0A84FF;
+                    margin: 15px 0;
+                    border-radius: 5px;
+                    color: #f5f5f7;
+                }
+                ul { margin-left: 20px; color: #f5f5f7; }
+                li { margin: 5px 0; color: #f5f5f7; }
+                b { color: #0A84FF; font-weight: bold; }
+                i { color: #98989d; }
+                code { 
+                    background-color: #1d1d1f; 
+                    color: #0A84FF;
+                    padding: 2px 6px; 
+                    border-radius: 3px;
+                    font-family: 'Courier New', monospace;
+                    border: 1px solid #3a3a3c;
+                }
+            </style>
+            """
+        else:
+            css = """
+            <style>
+                body { 
+                    font-family: 'Segoe UI', sans-serif; 
+                    line-height: 1.6;
+                    color: #1d1d1f;
+                    background-color: white;
+                }
+                h2 { color: #007AFF; margin-top: 20px; font-weight: bold; }
+                h3 { color: #0051D5; margin-top: 15px; font-weight: 600; }
+                h4 { color: #333; margin-top: 10px; font-weight: 600; }
+                p { color: #1d1d1f; }
+                .example { 
+                    background-color: #f0f8ff; 
+                    padding: 15px; 
+                    border-left: 4px solid #007AFF;
+                    margin: 15px 0;
+                    border-radius: 5px;
+                    color: #1d1d1f;
+                }
+                ul { margin-left: 20px; color: #1d1d1f; }
+                li { margin: 5px 0; color: #1d1d1f; }
+                b { color: #007AFF; font-weight: bold; }
+                i { color: #666; }
+                code { 
+                    background-color: #f5f5f5; 
+                    color: #007AFF;
+                    padding: 2px 6px; 
+                    border-radius: 3px;
+                    font-family: 'Courier New', monospace;
+                    border: 1px solid #d1d1d6;
+                }
+            </style>
+            """
         return css + content
     
     def prev_lesson(self):

@@ -256,11 +256,53 @@ class SolverPage(QWidget):
     
     def display_solution(self, result: dict):
         """Display the solution"""
-        html = "<h2>Solution Steps</h2>"
+        from ...core.config import Config
+        theme = Config.get("theme", "light")
+        
+        if theme == "dark":
+            style = """
+            <style>
+                body { background-color: #2c2c2e; color: #f5f5f7; font-family: 'Segoe UI', sans-serif; }
+                h2 { color: #0A84FF; font-weight: bold; margin-top: 20px; }
+                h3 { color: #0A84FF; font-weight: 600; margin-top: 15px; }
+                p { color: #f5f5f7; }
+                pre { 
+                    background-color: #1d1d1f; 
+                    color: #f5f5f7; 
+                    padding: 15px; 
+                    border-radius: 8px;
+                    border-left: 4px solid #0A84FF;
+                    font-family: 'Courier New', monospace;
+                    line-height: 1.6;
+                }
+                b { color: #0A84FF; font-weight: bold; }
+            </style>
+            """
+        else:
+            style = """
+            <style>
+                body { background-color: white; color: #1d1d1f; font-family: 'Segoe UI', sans-serif; }
+                h2 { color: #007AFF; font-weight: bold; margin-top: 20px; }
+                h3 { color: #0051D5; font-weight: 600; margin-top: 15px; }
+                p { color: #1d1d1f; }
+                pre { 
+                    background-color: #f5f5f7; 
+                    color: #1d1d1f; 
+                    padding: 15px; 
+                    border-radius: 8px;
+                    border-left: 4px solid #007AFF;
+                    font-family: 'Courier New', monospace;
+                    line-height: 1.6;
+                }
+                b { color: #007AFF; font-weight: bold; }
+            </style>
+            """
+        
+        html = style + "<h2>Solution Steps</h2>"
         
         for i, step in enumerate(result['steps'], 1):
             html += f"<h3>Step {i}: {step['title']}</h3>"
-            html += f"<p><pre>{step['content']}</pre></p>"
+            html += f"<pre>{step['content']}</pre>"
         
         if 'solution' in result:
             html += "<h2>Final Solution</h2>"

@@ -97,6 +97,10 @@ class StyleSheet:
             background-color: #f5f5f7;
         }
         
+        QWidget#contentPage QLabel {
+            color: #1d1d1f;
+        }
+        
         /* Cards */
         QFrame#card {
             background-color: white;
@@ -292,6 +296,26 @@ class StyleSheet:
         
         QTabBar::tab:hover {
             background-color: #e5e5ea;
+        }
+        
+        /* Spin Box */
+        QSpinBox {
+            background-color: white;
+            color: #1d1d1f;
+            border: 1px solid #d1d1d6;
+            border-radius: 6px;
+            padding: 5px;
+        }
+        
+        /* Radio Buttons */
+        QRadioButton {
+            color: #1d1d1f;
+            spacing: 8px;
+        }
+        
+        QRadioButton::indicator {
+            width: 18px;
+            height: 18px;
         }
         """
     
@@ -591,5 +615,48 @@ class StyleSheet:
             border: 1px solid #3a3a3c;
             border-radius: 8px;
             padding: 15px;
+        }
+        
+        /* Text Edit */
+        QTextEdit {
+            background-color: #2c2c2e;
+            color: #f5f5f7;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        /* Spin Box */
+        QSpinBox {
+            background-color: #2c2c2e;
+            color: #f5f5f7;
+            border: 1px solid #3a3a3c;
+            border-radius: 6px;
+            padding: 5px;
+        }
+        
+        QSpinBox::up-button, QSpinBox::down-button {
+            background-color: #3a3a3c;
+            border: none;
+        }
+        
+        /* Radio Buttons */
+        QRadioButton {
+            color: #f5f5f7;
+            spacing: 8px;
+        }
+        
+        QRadioButton::indicator {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* Text Edit */
+        QTextEdit {
+            background-color: #2c2c2e;
+            color: #f5f5f7;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            padding: 10px;
         }
         """

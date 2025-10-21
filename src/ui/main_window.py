@@ -223,6 +223,10 @@ class MainWindow(QMainWindow):
         """Handle theme change"""
         Config.set("theme", theme)
         self._apply_theme()
+        
+        # Refresh lesson content if on lessons page
+        if hasattr(self, 'lessons_page'):
+            self.lessons_page.refresh_content()
     
     def _apply_theme(self):
         """Apply the current theme"""
