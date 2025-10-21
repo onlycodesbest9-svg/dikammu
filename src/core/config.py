@@ -43,14 +43,23 @@ class Config:
         if cls._config_file.exists():
             try:
                 with open(cls._config_file, 'r', encoding='utf-8') as f:
-                    cls._instance = json.load(f)
-                # Merge with defaults for any missing keys
-                for key, value in cls._default_config.items():
-                    if key not in cls._instance:
-                        cls._instance[key] = value
+                    loaded_config = json.load(f)
+                
+                # Start with defaults and update with loaded values
+                cls._instance = cls._default_config.copy()
+                
+                # Only keep keys that exist in defaults (ignore old keys)
+                for key in cls._default_config.keys():
+                    if key in loaded_config:
+                        cls._instance[key] = loaded_config[key]
+                
+                # Save the cleaned config
+                cls.save()
             except Exception as e:
                 print(f"Error loading config: {e}")
+                print("Creating new config with defaults...")
                 cls._instance = cls._default_config.copy()
+                cls.save()
         else:
             cls._instance = cls._default_config.copy()
             cls.save()

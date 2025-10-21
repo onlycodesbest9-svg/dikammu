@@ -89,7 +89,6 @@ class MainWindow(QMainWindow):
         
         # Connect signals
         self.login_page.login_successful.connect(self.on_login_success)
-        self.settings_page.theme_changed.connect(self.on_theme_changed)
         
     def _create_sidebar(self) -> QWidget:
         """Create the navigation sidebar"""
@@ -229,14 +228,6 @@ class MainWindow(QMainWindow):
         
         self.show_page(self.lessons_page)
     
-    def on_theme_changed(self, theme: str):
-        """Handle theme change"""
-        Config.set("theme", theme)
-        self._apply_theme()
-        
-        # Refresh lesson content if on lessons page
-        if hasattr(self, 'lessons_page'):
-            self.lessons_page.refresh_content()
     
     def _apply_theme(self):
         """Apply the current theme"""
