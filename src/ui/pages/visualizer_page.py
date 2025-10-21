@@ -43,6 +43,28 @@ class VisualizerPage(QWidget):
         
         layout.addSpacing(10)
         
+        # How it works card
+        help_card = QFrame()
+        help_card.setObjectName("card")
+        help_layout = QVBoxLayout(help_card)
+        
+        help_title = QLabel("ℹ️ How the Visualizer Works")
+        help_title.setObjectName("sectionLabel")
+        help_layout.addWidget(help_title)
+        
+        help_text = QLabel(
+            "<b>Step 1:</b> Go to the Solver page and solve a recurrence relation<br>"
+            "<b>Step 2:</b> Click '📊 Visualize Sequence' button<br>"
+            "<b>Step 3:</b> View the interactive plot here!<br><br>"
+            "You can adjust the number of terms, change plot type, and toggle the grid."
+        )
+        help_text.setWordWrap(True)
+        help_layout.addWidget(help_text)
+        
+        layout.addWidget(help_card)
+        
+        layout.addSpacing(10)
+        
         # Controls card
         controls_card = QFrame()
         controls_card.setObjectName("card")

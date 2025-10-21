@@ -58,10 +58,10 @@ class StyleSheet:
             background-color: transparent;
             color: #1d1d1f;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             text-align: left;
-            padding: 12px 20px;
-            font-size: 14px;
+            padding: 10px 15px;
+            font-size: 13px;
             font-weight: 500;
         }
         
@@ -80,10 +80,10 @@ class StyleSheet:
                                        stop:0 #FF9500, stop:1 #FF6B00);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             text-align: center;
-            padding: 12px 20px;
-            font-size: 14px;
+            padding: 10px 15px;
+            font-size: 13px;
             font-weight: bold;
         }
         
@@ -178,6 +178,14 @@ class StyleSheet:
         
         /* Labels */
         QLabel {
+            color: #1d1d1f;
+        }
+        
+        QWidget QLabel {
+            color: #1d1d1f;
+        }
+        
+        QFrame QLabel {
             color: #1d1d1f;
         }
         
@@ -362,10 +370,10 @@ class StyleSheet:
             background-color: transparent;
             color: #f5f5f7;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             text-align: left;
-            padding: 12px 20px;
-            font-size: 14px;
+            padding: 10px 15px;
+            font-size: 13px;
             font-weight: 500;
         }
         
@@ -384,10 +392,10 @@ class StyleSheet:
                                        stop:0 #FF9F0A, stop:1 #FF6B00);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             text-align: center;
-            padding: 12px 20px;
-            font-size: 14px;
+            padding: 10px 15px;
+            font-size: 13px;
             font-weight: bold;
         }
         

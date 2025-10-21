@@ -99,6 +99,14 @@ class LoginPage(QWidget):
         self.username_input.setPlaceholderText("Enter your username")
         center_layout.addWidget(self.username_input)
         
+        # Room code (for students only)
+        self.room_label = QLabel("Room Code (Optional for Students):")
+        center_layout.addWidget(self.room_label)
+        
+        self.room_input = QLineEdit()
+        self.room_input.setPlaceholderText("Enter room code to join class")
+        center_layout.addWidget(self.room_input)
+        
         # Instructor PIN (highlighted)
         self.pin_label = QLabel("Instructor PIN:")
         self.pin_label.setObjectName("sectionLabel")
@@ -141,6 +149,10 @@ class LoginPage(QWidget):
         """Show/hide PIN field for instructor mode"""
         self.pin_label.setVisible(checked)
         self.pin_input.setVisible(checked)
+        
+        # Hide room code for instructors
+        self.room_label.setVisible(not checked)
+        self.room_input.setVisible(not checked)
     
     def update_button_text(self):
         """Update submit button text"""
@@ -153,36 +165,98 @@ class LoginPage(QWidget):
         """Handle login/registration"""
         user_id = self.id_input.text().strip()
         username = self.username_input.text().strip()
+        room_code = self.room_input.text().strip().upper()
         
         if not user_id or not username:
             self.show_status("Please enter both ID and username", error=True)
             return
         
         # Check instructor mode
-        if self.instructor_radio.isChecked():
-            pin = self.pin_input.text().strip()
-            from ...core.config import Config
-            correct_pin = Config.get("instructor_pin", "1234")
-            
-            if pin != correct_pin:
-                self.show_status("❌ Incorrect PIN. Access denied.", error=True)
-                return
+        is_instructor = self.instructor_radio.isChecked()
+        
+        if is_instructor:
+            # For instructor registration, allow setting initial PIN
+            if self.register_radio.isChecked():
+                pin = self.pin_input.text().strip()
+                if not pin:
+                    self.show_status("❌ Please set an instructor PIN", error=True)
+                    return
+                
+                # Register as instructor
+                if DataManager.register_user(user_id, username):
+                    # Mark as instructor and set PIN
+                    from ...core.config import Config
+                    Config.set("instructor_pin", pin)
+                    
+                    conn = DataManager._get_connection()
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE users SET is_instructor = 1 WHERE id = ?", (user_id,))
+                    conn.commit()
+                    
+                    self.show_status("✅ Instructor registered! You can now login.", error=False)
+                    self.login_radio.setChecked(True)
+                    return
+                else:
+                    self.show_status("❌ User ID already exists.", error=True)
+                    return
+            else:
+                # Instructor login - verify PIN
+                pin = self.pin_input.text().strip()
+                from ...core.config import Config
+                correct_pin = Config.get("instructor_pin", "1234")
+                
+                if pin != correct_pin:
+                    self.show_status("❌ Incorrect PIN. Access denied.", error=True)
+                    return
         
         # Handle login or registration
         if self.login_radio.isChecked():
             # Login
             if DataManager.login_user(user_id, username):
+                # If student with room code, join room
+                if not is_instructor and room_code:
+                    self.join_room(user_id, room_code)
+                
                 self.show_status("✅ Login successful!", error=False)
                 self.login_successful.emit(user_id, username)
             else:
                 self.show_status("❌ Invalid credentials. Please try again or register.", error=True)
         else:
-            # Registration
+            # Registration (students only, instructors handled above)
             if DataManager.register_user(user_id, username):
+                # If room code provided, join room
+                if room_code:
+                    self.join_room(user_id, room_code)
+                
                 self.show_status("✅ Registration successful! You can now login.", error=False)
                 self.login_radio.setChecked(True)
             else:
                 self.show_status("❌ User ID already exists. Please login instead.", error=True)
+    
+    def join_room(self, user_id: str, room_code: str):
+        """Join a room with the given code"""
+        from ...core.config import Config
+        from datetime import datetime
+        
+        # Verify room code exists
+        current_room = Config.get("room_code")
+        if current_room != room_code:
+            self.show_status(f"⚠️ Room code '{room_code}' not found. Logged in without room.", error=False)
+            return
+        
+        # Add to room
+        try:
+            conn = DataManager._get_connection()
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT OR REPLACE INTO room_members (room_code, user_id, joined_at)
+                VALUES (?, ?, ?)
+            ''', (room_code, user_id, datetime.now().isoformat()))
+            conn.commit()
+            
+            self.show_status(f"✅ Joined room: {room_code}", error=False)
+        except Exception as e:
+            print(f"Error joining room: {e}")
     
     def show_status(self, message: str, error: bool = False):
         """Show status message"""

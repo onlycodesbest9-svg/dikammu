@@ -98,6 +98,17 @@ class DataManager:
             )
         ''')
         
+        # Room members table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS room_members (
+                room_code TEXT,
+                user_id TEXT,
+                joined_at TEXT,
+                PRIMARY KEY (room_code, user_id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        ''')
+        
         conn.commit()
     
     @classmethod

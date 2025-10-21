@@ -215,11 +215,37 @@ class SettingsPage(QWidget):
         Config.set("theme", theme)
         self.theme_changed.emit(theme)
     
+    def update_username(self):
+        """Update username"""
+        user_id = Config.get("current_user")
+        if not user_id:
+            return
+        
+        new_username = self.username_input.text().strip()
+        if not new_username:
+            QMessageBox.warning(self, "Invalid Input", "Username cannot be empty.")
+            return
+        
+        # Update in database
+        from ...core.data_manager import DataManager
+        try:
+            conn = DataManager._get_connection()
+            cursor = conn.cursor()
+            cursor.execute("UPDATE users SET username = ? WHERE id = ?", (new_username, user_id))
+            conn.commit()
+            
+            QMessageBox.information(self, "Success", 
+                                  f"✅ Username updated to: {new_username}")
+            
+            # Update sidebar display
+            if hasattr(self.window(), 'user_label'):
+                self.window().user_label.setText(f"👤 {new_username}\n({user_id})")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to update username: {e}")
+    
     def save_settings(self):
         """Save all settings"""
-        Config.set("font_size", self.font_size_spin.value())
         Config.set("accent_color", self.accent_combo.currentData())
-        Config.set("graph_color_palette", self.palette_combo.currentText())
         
         QMessageBox.information(self, "Settings Saved",
                               "✅ Your settings have been saved successfully!")
@@ -234,11 +260,13 @@ class SettingsPage(QWidget):
         
         if reply == QMessageBox.Yes:
             Config.set("current_user", None)
-            QMessageBox.information(self, "Logged Out",
-                                  "You have been logged out. Please restart the application.")
             
-            # In a real app, we'd return to login screen
-            # For now, just show message
+            # Return to login page
+            main_window = self.window()
+            if hasattr(main_window, 'show_login'):
+                main_window.show_login()
+                QMessageBox.information(self, "Logged Out",
+                                      "✅ You have been logged out successfully.")
     
     def reset_settings(self):
         """Reset all settings to defaults"""
@@ -255,9 +283,7 @@ class SettingsPage(QWidget):
             
             # Update UI
             self.theme_light.setChecked(True)
-            self.font_size_spin.setValue(12)
             self.accent_combo.setCurrentIndex(0)
-            self.palette_combo.setCurrentIndex(0)
             
             QMessageBox.information(self, "Reset Complete",
                                   "✅ Settings have been reset to defaults!")
