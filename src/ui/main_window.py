@@ -59,15 +59,7 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # Sidebar
-        self.sidebar = self._create_sidebar()
-        main_layout.addWidget(self.sidebar)
-        
-        # Content area
-        self.content_stack = QStackedWidget()
-        main_layout.addWidget(self.content_stack, 1)
-        
-        # Create pages
+        # Create pages FIRST (before sidebar that references them)
         self.login_page = LoginPage()
         self.lessons_page = LessonsPage()
         self.solver_page = SolverPage()
@@ -75,6 +67,16 @@ class MainWindow(QMainWindow):
         self.practice_page = PracticePage()
         self.settings_page = SettingsPage()
         self.instructor_page = InstructorPage()
+        
+        # Content area
+        self.content_stack = QStackedWidget()
+        
+        # Sidebar (created AFTER pages exist)
+        self.sidebar = self._create_sidebar()
+        main_layout.addWidget(self.sidebar)
+        
+        # Add content stack
+        main_layout.addWidget(self.content_stack, 1)
         
         # Add pages to stack
         self.content_stack.addWidget(self.login_page)
