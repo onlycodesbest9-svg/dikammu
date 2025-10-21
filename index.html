@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+  <title>UPC Validator</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <div class="app-container">
+     Header 
+    <header class="app-header">
+      <h1>UPC Validator</h1>
+      <p class="subtitle">Real-Time Barcode Validation & Decoding System</p>
+    </header>
+
+     Main Content 
+    <main class="main-content">
+       Tab Navigation 
+      <nav class="tab-navigation">
+        <button class="tab-btn active" data-tab="validate">Validate</button>
+        <button class="tab-btn" data-tab="generate">Generate</button>
+        <button class="tab-btn" data-tab="scan">Scan</button>
+        <button class="tab-btn" data-tab="batch">Batch Process</button>
+        <button class="tab-btn" data-tab="history">History</button>
+      </nav>
+
+       Tab Content 
+      <div class="tab-content-container">
+         Validate Tab 
+        <div id="validate-tab" class="tab-content active">
+          <div class="validate-section">
+            <div class="input-group">
+              <label for="upc-input">Enter UPC Code (use ? for missing digit)</label>
+              <input 
+                type="text" 
+                id="upc-input" 
+                placeholder="e.g., 012345678905 or 01234567890?" 
+                maxlength="12"
+                autocomplete="off"
+              >
+              <div class="input-actions">
+                <button id="validate-btn" class="btn btn-primary">Validate</button>
+                <button id="clear-btn" class="btn btn-secondary">Clear</button>
+              </div>
+            </div>
+
+             Validation Result 
+            <div id="validation-result" class="validation-result hidden">
+              <div class="result-header">
+                <span class="status-badge"></span>
+                <h3 class="result-title"></h3>
+              </div>
+              <div class="result-details"></div>
+            </div>
+
+             UPC Breakdown 
+            <div id="upc-breakdown" class="upc-breakdown hidden">
+              <h3>UPC Breakdown</h3>
+              <div class="breakdown-grid">
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Number System</span>
+                  <span class="breakdown-value" id="number-system">-</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Manufacturer Code</span>
+                  <span class="breakdown-value" id="manufacturer-code">-</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Product Code</span>
+                  <span class="breakdown-value" id="product-code">-</span>
+                </div>
+                <div class="breakdown-item">
+                  <span class="breakdown-label">Check Digit</span>
+                  <span class="breakdown-value" id="check-digit">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+         Generate Tab 
+        <div id="generate-tab" class="tab-content">
+          <div class="generate-section">
+            <p class="section-description">Generate barcode images from valid UPC codes</p>
+            <div class="input-group">
+              <label for="generate-input">Enter Valid UPC Code</label>
+              <input 
+                type="text" 
+                id="generate-input" 
+                placeholder="e.g., 012345678905" 
+                maxlength="12"
+              >
+              <div class="format-options">
+                <label>
+                  <input type="radio" name="format" value="png" checked>
+                  PNG
+                </label>
+                <label>
+                  <input type="radio" name="format" value="svg">
+                  SVG
+                </label>
+              </div>
+              <button id="generate-barcode-btn" class="btn btn-primary">Generate Barcode</button>
+            </div>
+            <div id="barcode-preview" class="barcode-preview hidden">
+              <h3>Preview</h3>
+              <div id="barcode-canvas"></div>
+              <button id="save-barcode-btn" class="btn btn-secondary">Save Barcode</button>
+            </div>
+          </div>
+        </div>
+
+         Scan Tab 
+        <div id="scan-tab" class="tab-content">
+          <div class="scan-section">
+            <p class="section-description">Scan barcodes using your webcam</p>
+            <div class="camera-controls">
+              <button id="start-camera-btn" class="btn btn-primary">Start Camera</button>
+              <button id="stop-camera-btn" class="btn btn-secondary hidden">Stop Camera</button>
+            </div>
+            <div id="camera-preview" class="camera-preview hidden">
+              <video id="camera-video" autoplay></video>
+              <canvas id="camera-canvas" class="hidden"></canvas>
+            </div>
+            <div id="scan-result" class="scan-result hidden"></div>
+          </div>
+        </div>
+
+         Batch Process Tab 
+        <div id="batch-tab" class="tab-content">
+          <div class="batch-section">
+            <p class="section-description">Process multiple UPC codes from CSV files</p>
+            <div class="batch-actions">
+              <button id="import-csv-btn" class="btn btn-primary">Import CSV</button>
+              <button id="export-csv-btn" class="btn btn-secondary" disabled>Export Results (CSV)</button>
+              <button id="export-pdf-btn" class="btn btn-secondary" disabled>Export Results (PDF)</button>
+            </div>
+            <div id="batch-results" class="batch-results hidden">
+              <h3>Processing Results</h3>
+              <div class="batch-stats">
+                <div class="stat-item">
+                  <span class="stat-label">Total</span>
+                  <span class="stat-value" id="total-count">0</span>
+                </div>
+                <div class="stat-item stat-valid">
+                  <span class="stat-label">Valid</span>
+                  <span class="stat-value" id="valid-count">0</span>
+                </div>
+                <div class="stat-item stat-invalid">
+                  <span class="stat-label">Invalid</span>
+                  <span class="stat-value" id="invalid-count">0</span>
+                </div>
+              </div>
+              <div id="batch-table-container" class="batch-table-container"></div>
+            </div>
+          </div>
+        </div>
+
+         History Tab 
+        <div id="history-tab" class="tab-content">
+          <div class="history-section">
+            <div class="history-header">
+              <h3>Validation History</h3>
+              <button id="clear-history-btn" class="btn btn-secondary">Clear History</button>
+            </div>
+            <div id="history-list" class="history-list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
