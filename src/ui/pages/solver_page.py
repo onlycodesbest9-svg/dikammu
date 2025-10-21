@@ -135,10 +135,6 @@ class SolverPage(QWidget):
         # Action buttons
         action_layout = QHBoxLayout()
         
-        viz_btn = QPushButton("📊 Visualize Sequence")
-        viz_btn.clicked.connect(self.visualize_solution)
-        action_layout.addWidget(viz_btn)
-        
         export_pdf_btn = QPushButton("📄 Export to PDF")
         export_pdf_btn.setObjectName("secondaryButton")
         export_pdf_btn.clicked.connect(lambda: self.export_solution("pdf"))
