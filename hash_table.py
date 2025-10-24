@@ -41,8 +41,12 @@ class HashTable:
         return self._size / self._capacity if self._capacity else 0.0
 
     def _hash(self, k: int) -> int:
-        """Compute initial hash index."""
-        return k % self._capacity
+        """
+        Compute initial hash index.
+        Formula: (k + 1) % capacity
+        This ensures Hash Number is different from ID.
+        """
+        return (k + 1) % self._capacity
 
     def _find_slot_for_insertion(self, key: int) -> Optional[int]:
         """

@@ -354,7 +354,8 @@ class MainAppWindow(QtWidgets.QMainWindow):
             desc_str = (rec.description or "")[:100] + ("..." if rec.description and len(rec.description) > 100 else "")
             self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(desc_str))
             # Calculate hash number (original hash before probing)
-            hash_number = rec.id % self.hash_table.capacity
+            # Using same formula as hashtable: (ID + 1) % capacity
+            hash_number = (rec.id + 1) % self.hash_table.capacity
             self.table.setItem(row, 5, QtWidgets.QTableWidgetItem(str(hash_number)))
         self.table.resizeColumnsToContents()
 

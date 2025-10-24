@@ -214,7 +214,9 @@ class Record:
 Mode | ID | Name | Price | Description | Hash Number
 ```
 
-Where **Hash Number** = `ID % capacity` (original hash before linear probing)
+Where **Hash Number** = `(ID + 1) % capacity` (original hash before linear probing)
+
+**Important**: Hash Number is now DIFFERENT from ID to avoid confusion!
 
 ---
 
@@ -279,12 +281,13 @@ Description: Ergonomic chair with lumbar support
 
 ### Duplicate IDs
 ```
-Insert ID=8 "First"  → Hash Number=8, Slot 8
-Insert ID=8 "Second" → Hash Number=8, Slot 9 (NOT overwritten!)
-Insert ID=8 "Third"  → Hash Number=8, Slot 10 (NOT overwritten!)
+Insert ID=8 "First"  → Hash Number=9, Slot 9
+Insert ID=8 "Second" → Hash Number=9, Slot 10 (NOT overwritten!)
+Insert ID=8 "Third"  → Hash Number=9, Slot 0 (NOT overwritten!)
 
 → Result: 3 separate entries in hashtable
-→ Display: All show Hash Number=8 (their original hash)
+→ Display: All show Hash Number=9 (calculated as (8+1)%11 = 9)
+→ Note: Hash Number (9) is different from ID (8)
 ```
 
 ---
