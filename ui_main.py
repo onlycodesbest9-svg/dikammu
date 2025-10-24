@@ -159,12 +159,12 @@ class MainAppWindow(QtWidgets.QMainWindow):
         v.addLayout(search_row)
 
         # Table column - Show all fields
-        self.table = QtWidgets.QTableWidget(0, 7)
+        self.table = QtWidgets.QTableWidget(0, 6)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
         self.table.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.table.setHorizontalHeaderLabels(["Mode", "ID", "Name", "Price", "Description", "Slot Index", "Inserted At"])
+        self.table.setHorizontalHeaderLabels(["Mode", "ID", "Name", "Price", "Description", "Hash Number"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.verticalHeader().setVisible(False)
         v.addWidget(self.table)
@@ -353,8 +353,9 @@ class MainAppWindow(QtWidgets.QMainWindow):
             self.table.setItem(row, 3, QtWidgets.QTableWidgetItem(price_str))
             desc_str = (rec.description or "")[:100] + ("..." if rec.description and len(rec.description) > 100 else "")
             self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(desc_str))
-            self.table.setItem(row, 5, QtWidgets.QTableWidgetItem(str(rec.hash_index if rec.hash_index is not None else "")))
-            self.table.setItem(row, 6, QtWidgets.QTableWidgetItem(str(rec.inserted_at if rec.inserted_at is not None else "")))
+            # Calculate hash number (original hash before probing)
+            hash_number = rec.id % self.hash_table.capacity
+            self.table.setItem(row, 5, QtWidgets.QTableWidgetItem(str(hash_number)))
         self.table.resizeColumnsToContents()
 
     def _refresh_table(self) -> None:

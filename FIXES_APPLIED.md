@@ -76,10 +76,14 @@ rec = Record(
 ```
 
 #### Table Display
-Updated from 6 to 7 columns to show all fields separately:
+Updated to 6 columns showing essential fields:
 
 **Before**: `["Mode", "ID", "Name", "Price/Desc", "Slot Index", "Inserted At"]`  
-**After**: `["Mode", "ID", "Name", "Price", "Description", "Slot Index", "Inserted At"]`
+**After**: `["Mode", "ID", "Name", "Price", "Description", "Hash Number"]`
+
+Note: 
+- **Hash Number**: Shows the original hash value (ID % capacity) before linear probing
+- **Slot Index** and **Inserted At** are no longer displayed (hidden from UI)
 
 ---
 
@@ -201,9 +205,16 @@ class Record:
     price: Optional[float]         # Always stored (both modes)
     description: Optional[str]     # Always stored (both modes)
     key: Optional[int]             # Internal use (hidden from UI)
-    hash_index: Optional[int]      # Final slot after probing
-    inserted_at: Optional[int]     # Insertion order
+    hash_index: Optional[int]      # Final slot after probing (hidden from UI)
+    inserted_at: Optional[int]     # Insertion order (hidden from UI)
 ```
+
+### Table Display Columns
+```
+Mode | ID | Name | Price | Description | Hash Number
+```
+
+Where **Hash Number** = `ID % capacity` (original hash before linear probing)
 
 ---
 
@@ -216,7 +227,7 @@ class Record:
 | **Description Size** | No limit, oversized | 1000 char max, 3 lines height |
 | **Duplicate IDs** | Overwrites older entry | Creates new entry in new slot |
 | **Linear Probing** | Finds matching key OR empty | Finds empty slot only |
-| **Table Columns** | 6 columns (Price/Desc combined) | 7 columns (Price and Desc separate) |
+| **Table Columns** | 6 columns (Price/Desc combined) | 6 columns (Price, Desc, Hash Number) |
 | **Data Persistence** | Mode-dependent fields | All fields always stored |
 
 ---
@@ -250,8 +261,8 @@ Name: Laptop
 Price: ₱50000.00
 Description: High-performance gaming laptop with RTX 4080
 
-→ Stores: ALL fields
-→ Display: Shows all fields in table
+→ Stores: ALL fields (including hash_index and inserted_at internally)
+→ Display: Mode, ID, Name, Price, Description, Hash Number
 ```
 
 ### Item Mode
@@ -262,17 +273,18 @@ Name: Office Chair
 Price: ₱3500.00
 Description: Ergonomic chair with lumbar support
 
-→ Stores: ALL fields
-→ Display: Shows all fields in table
+→ Stores: ALL fields (including hash_index and inserted_at internally)
+→ Display: Mode, ID, Name, Price, Description, Hash Number
 ```
 
 ### Duplicate IDs
 ```
-Insert ID=8 "First"  → Slot 8
-Insert ID=8 "Second" → Slot 9 (NOT overwritten!)
-Insert ID=8 "Third"  → Slot 10 (NOT overwritten!)
+Insert ID=8 "First"  → Hash Number=8, Slot 8
+Insert ID=8 "Second" → Hash Number=8, Slot 9 (NOT overwritten!)
+Insert ID=8 "Third"  → Hash Number=8, Slot 10 (NOT overwritten!)
 
 → Result: 3 separate entries in hashtable
+→ Display: All show Hash Number=8 (their original hash)
 ```
 
 ---
