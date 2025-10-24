@@ -120,7 +120,11 @@ class MainAppWindow(QtWidgets.QMainWindow):
         self.price_spin.setSingleStep(1.0)
 
         self.desc_edit = QtWidgets.QTextEdit()
-        self.desc_edit.setPlaceholderText("Item description")
+        self.desc_edit.setPlaceholderText("Description")
+        self.desc_edit.setMaximumHeight(80)  # Limit to ~3 lines
+        self.desc_edit.setAcceptRichText(False)
+        # Set max length to 1000 characters
+        self.desc_edit.textChanged.connect(self._limit_description_length)
 
         form.addWidget(QtWidgets.QLabel("Mode"), 0, 0)
         form.addWidget(self.mode_combo, 0, 1)
@@ -154,13 +158,13 @@ class MainAppWindow(QtWidgets.QMainWindow):
         
         v.addLayout(search_row)
 
-        # Table column - Updated to show new fields
-        self.table = QtWidgets.QTableWidget(0, 6)
+        # Table column - Show all fields
+        self.table = QtWidgets.QTableWidget(0, 7)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
         self.table.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.table.setHorizontalHeaderLabels(["Mode", "ID", "Name", "Price/Desc", "Slot Index", "Inserted At"])
+        self.table.setHorizontalHeaderLabels(["Mode", "ID", "Name", "Price", "Description", "Slot Index", "Inserted At"])
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.verticalHeader().setVisible(False)
         v.addWidget(self.table)
@@ -172,8 +176,8 @@ class MainAppWindow(QtWidgets.QMainWindow):
         # Tooltips
         self.id_edit.setToolTip("Enter a numeric ID (e.g., 1001)")
         self.mode_combo.setToolTip("Switch between Product and Item modes")
-        self.price_spin.setToolTip("Only used in Product mode")
-        self.desc_edit.setToolTip("Only used in Item mode")
+        self.price_spin.setToolTip("Enter price (required in Product mode, optional in Item mode)")
+        self.desc_edit.setToolTip("Enter description (max 1000 characters)")
         self.btn_add.setToolTip("Add or update an item")
         self.btn_remove.setToolTip("Remove the selected item")
         self.btn_export.setToolTip("Export all items to CSV")
@@ -195,6 +199,15 @@ class MainAppWindow(QtWidgets.QMainWindow):
 
         # Initialize mode
         self._on_mode_change(self.mode_combo.currentText())
+    
+    def _limit_description_length(self) -> None:
+        """Limit description to 1000 characters."""
+        text = self.desc_edit.toPlainText()
+        if len(text) > 1000:
+            cursor = self.desc_edit.textCursor()
+            self.desc_edit.setPlainText(text[:1000])
+            cursor.setPosition(1000)
+            self.desc_edit.setTextCursor(cursor)
 
     def _apply_theme(self, light: bool) -> None:
         qss = self.theme_mgr.get_light_qss() if light else self.theme_mgr.get_dark_qss()
@@ -205,23 +218,34 @@ class MainAppWindow(QtWidgets.QMainWindow):
         self._apply_theme(light=not self.is_dark)
 
     def _on_mode_change(self, mode: str) -> None:
-        is_product = (mode == "Product")
-        self.price_spin.setVisible(is_product)
-        self.findChild(QtWidgets.QLabel, None).setVisible(True)
-        self.desc_edit.setVisible(not is_product)
-        self.name_edit.setPlaceholderText("Product name" if is_product else "Item name")
+        # Both modes now show all fields - no hiding
+        self.name_edit.setPlaceholderText("Product name" if mode == "Product" else "Item name")
+        self.desc_edit.setPlaceholderText("Product description" if mode == "Product" else "Item description")
 
     def _validate_inputs(self) -> tuple[bool, str]:
         id_text = self.id_edit.text().strip()
         name = self.name_edit.text().strip()
+        mode = self.mode_combo.currentText()
+        
         if not id_text.isdigit():
             return False, "ID must be numeric"
         if not name:
             return False, "Name must not be empty"
-        if self.mode_combo.currentText() == "Product" and self.price_spin.value() <= 0:
-            return False, "Price must be greater than 0"
-        if self.mode_combo.currentText() == "Item" and not self.desc_edit.toPlainText().strip():
-            return False, "Description must not be empty"
+        
+        # Product mode: price and description required
+        if mode == "Product":
+            if self.price_spin.value() <= 0:
+                return False, "Price must be greater than 0 in Product mode"
+            if not self.desc_edit.toPlainText().strip():
+                return False, "Description must not be empty in Product mode"
+        
+        # Item mode: price and description required
+        if mode == "Item":
+            if self.price_spin.value() <= 0:
+                return False, "Price must be greater than 0 in Item mode"
+            if not self.desc_edit.toPlainText().strip():
+                return False, "Description must not be empty in Item mode"
+        
         return True, ""
 
     def _on_add(self) -> None:
@@ -232,15 +256,27 @@ class MainAppWindow(QtWidgets.QMainWindow):
         mode = self.mode_combo.currentText()
         id_val = int(self.id_edit.text().strip())
         name = self.name_edit.text().strip()
-        if mode == "Product":
-            rec = Record(mode=mode, id=id_val, name=name, price=float(self.price_spin.value()))
-        else:
-            rec = Record(mode=mode, id=id_val, name=name, description=self.desc_edit.toPlainText().strip())
+        price = float(self.price_spin.value())
+        description = self.desc_edit.toPlainText().strip()
+        
+        # Both modes now store both price and description
+        rec = Record(
+            mode=mode,
+            id=id_val,
+            name=name,
+            price=price,
+            description=description
+        )
         
         try:
             self.hash_table.insert(id_val, rec)
             self._refresh_table()
             self._update_size_label()
+            # Clear inputs after successful insert
+            self.id_edit.clear()
+            self.name_edit.clear()
+            self.price_spin.setValue(0.0)
+            self.desc_edit.clear()
         except RuntimeError as e:
             QtWidgets.QMessageBox.critical(self, "Error", str(e))
 
@@ -312,10 +348,13 @@ class MainAppWindow(QtWidgets.QMainWindow):
             self.table.setItem(row, 0, QtWidgets.QTableWidgetItem(rec.mode))
             self.table.setItem(row, 1, QtWidgets.QTableWidgetItem(str(rec.id)))
             self.table.setItem(row, 2, QtWidgets.QTableWidgetItem(rec.name))
-            fourth = f"₱ {rec.price:.2f}" if rec.mode == "Product" and rec.price is not None else (rec.description or "")
-            self.table.setItem(row, 3, QtWidgets.QTableWidgetItem(fourth))
-            self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(str(rec.hash_index if rec.hash_index is not None else "")))
-            self.table.setItem(row, 5, QtWidgets.QTableWidgetItem(str(rec.inserted_at if rec.inserted_at is not None else "")))
+            # Separate price and description columns
+            price_str = f"₱{rec.price:.2f}" if rec.price is not None and rec.price > 0 else ""
+            self.table.setItem(row, 3, QtWidgets.QTableWidgetItem(price_str))
+            desc_str = (rec.description or "")[:100] + ("..." if rec.description and len(rec.description) > 100 else "")
+            self.table.setItem(row, 4, QtWidgets.QTableWidgetItem(desc_str))
+            self.table.setItem(row, 5, QtWidgets.QTableWidgetItem(str(rec.hash_index if rec.hash_index is not None else "")))
+            self.table.setItem(row, 6, QtWidgets.QTableWidgetItem(str(rec.inserted_at if rec.inserted_at is not None else "")))
         self.table.resizeColumnsToContents()
 
     def _refresh_table(self) -> None:

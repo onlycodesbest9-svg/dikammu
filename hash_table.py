@@ -44,17 +44,44 @@ class HashTable:
         """Compute initial hash index."""
         return k % self._capacity
 
-    def _find_slot(self, key: int, for_insertion: bool = False) -> Optional[int]:
+    def _find_slot_for_insertion(self, key: int) -> Optional[int]:
         """
-        Find the slot for a given key using linear probing.
+        Find the next available empty slot for insertion using linear probing.
+        NEVER returns a slot with an existing record - always finds an empty slot.
+        This ensures no overwriting occurs.
+        
+        Args:
+            key: The key to hash (for initial position)
+        
+        Returns:
+            Empty slot index if found, None if table is full
+        """
+        initial_idx = self._hash(key)
+        idx = initial_idx
+        probes = 0
+        
+        while probes < self._capacity:
+            if self._buckets[idx] is None:
+                # Found empty slot
+                return idx
+            
+            # Slot occupied - probe forward
+            idx = (idx + 1) % self._capacity
+            probes += 1
+        
+        # Table is full - no empty slots
+        return None
+    
+    def _find_slot_for_search(self, key: int) -> Optional[int]:
+        """
+        Find a record by key using linear probing.
+        Returns the first matching record found.
         
         Args:
             key: The key to search for
-            for_insertion: If True, return first available slot (None or matching key)
-                          If False, return slot only if key matches
         
         Returns:
-            Slot index if found, None otherwise
+            Slot index if key found, None otherwise
         """
         initial_idx = self._hash(key)
         idx = initial_idx
@@ -64,25 +91,26 @@ class HashTable:
             current_record = self._buckets[idx]
             
             if current_record is None:
-                # Empty slot found
-                return idx if for_insertion else None
+                # Empty slot - key not found
+                return None
             
             if current_record.id == key:
                 # Key found
                 return idx
             
-            # Collision: probe forward
+            # Different key - probe forward
             idx = (idx + 1) % self._capacity
             probes += 1
         
-        # Table is full or key not found
-        return None if not for_insertion else None
+        # Searched entire table - key not found
+        return None
 
     def insert(self, key: int, record: Record) -> None:
         """
         Insert a record using linear probing.
-        If key exists, update the record.
+        NEVER overwrites existing entries - always inserts to a new empty slot.
         If collision occurs, probe forward to next available slot.
+        Duplicate IDs are allowed and will be stored in separate slots.
         """
         if key is None:
             raise ValueError("Key must not be None")
@@ -91,14 +119,11 @@ class HashTable:
         if self.load_factor >= self._max_load:
             self._resize(self._next_prime(self._capacity * 2))
         
-        # Find slot for insertion
-        idx = self._find_slot(key, for_insertion=True)
+        # Find next empty slot for insertion (never overwrites)
+        idx = self._find_slot_for_insertion(key)
         
         if idx is None:
             raise RuntimeError("Hash table is full - cannot insert")
-        
-        # Check if this is an update or new insertion
-        is_update = self._buckets[idx] is not None and self._buckets[idx].id == key
         
         # Update record metadata
         record.key = key
@@ -106,24 +131,25 @@ class HashTable:
         self._insert_counter += 1
         record.inserted_at = self._insert_counter
         
-        # Insert/update the record
+        # Insert the record into the empty slot
         self._buckets[idx] = record
-        
-        # Increment size only for new insertions
-        if not is_update:
-            self._size += 1
+        self._size += 1
 
     def get(self, key: int) -> Optional[Record]:
-        """Retrieve a record by key using linear probing."""
-        idx = self._find_slot(key, for_insertion=False)
+        """
+        Retrieve the first record matching the key using linear probing.
+        Note: If duplicate IDs exist, only the first one found is returned.
+        """
+        idx = self._find_slot_for_search(key)
         return self._buckets[idx] if idx is not None else None
 
     def remove(self, key: int) -> bool:
         """
-        Remove a record by key.
+        Remove the first record matching the key.
         After removal, rehash subsequent entries to maintain probe chain integrity.
+        Note: If duplicate IDs exist, only the first one found is removed.
         """
-        idx = self._find_slot(key, for_insertion=False)
+        idx = self._find_slot_for_search(key)
         
         if idx is None:
             return False
